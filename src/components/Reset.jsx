@@ -1,24 +1,22 @@
 import React, { Component } from 'react'
-import { Link, Navigate } from 'react-router-dom'
-import axios from 'axios'
-class Register extends Component {
+import axios from 'axios';
+class Reset extends Component {
     state = {
+        token: '',
         email: '',
-        name: '',
         password: '',
         confirm_password: '',
-        name_error: '',
+        token_error: '',
         email_error: '',
         password_error: '',
         confirm_error: '',
         message: '',
-        loggedIn: false,
     }
 
     formSubmit = (e) => {
         e.preventDefault();
         this.setState({
-            name_error: '',
+            token_error: '',
             email_error: '',
             password_error: '',
             confirm_error: '',
@@ -26,45 +24,40 @@ class Register extends Component {
         });
         const data = {
             email: this.state.email,
-            name: this.state.name,
+            token: this.state.token,
             password: this.state.password,
             confirm_password: this.state.confirm_password,
         }
-        axios.post('/register', data)
+        axios.post('/resetpassword', data)
         .then((response) => {
-            localStorage.setItem('token', response.data.token);
             this.setState({
+                message: response.data.message,
                 loggedIn: true,
             });
-            this.props.setUser(response.data.user);
+            document.getElementById("resetform").reset();
         })
         .catch((error) => {
             if(error.response.data.errors){
                 this.setState({
                     email_error: error.response.data.errors.email,
-                    name_error: error.response.data.errors.name,
+                    token_error: error.response.data.errors.token,
                     password_error: error.response.data.errors.password,
                     confirm_error: error.response.data.errors.confirm_password,
                 });
             }
+            this.setState({message: error.response.data.message});
         });
     }
 
     render() {
-        //After login redirect to Profile Page
-        if(localStorage.getItem('token')){
-            return <Navigate to='/profile' />
-        }
-
-        //Show error
         let message = "";
         let email_error = "";
         let password_error = "";
-        let name_error = "";
+        let token_error = "";
         let confirm_error = "";
         if(this.state.message){
             message = (
-                <div className="alert alert-danger" role="alert">
+                <div className="alert alert-success" role="alert">
                     {this.state.message}
                 </div>
             );
@@ -83,10 +76,10 @@ class Register extends Component {
                 </div>
             );
         }
-        if(this.state.name_error){
-            name_error = (
+        if(this.state.token_error){
+            token_error = (
                 <div className="text-danger" role="alert">
-                    {this.state.name_error}
+                    {this.state.token_error}
                 </div>
             );
         }
@@ -101,11 +94,11 @@ class Register extends Component {
             <div><br></br>
                 <div className='row'>
                     <div className='jumbotron col-lg-4 offset-lg-4'>
-                        <h3 className='text-center'>Register</h3>
+                        <h3 className='text-center'>Reset Password</h3>
 
                         {message}
 
-                        <form onSubmit={this.formSubmit}>
+                        <form onSubmit={this.formSubmit} id='resetform'>
                             <div className="form-group">
                                 <label>Email address</label>
                                 <input type="email" className="form-control" placeholder="Enter email" name='email'
@@ -115,15 +108,15 @@ class Register extends Component {
                             </div>
 
                             <div className="form-group">
-                                <label>Name</label>
-                                <input type="text" className="form-control" placeholder="User Name" name='name'
-                                onChange={(e) => {this.setState({name: e.target.value})}}
+                                <label>Token</label>
+                                <input type="text" className="form-control" placeholder="Enter token" name='token'
+                                onChange={(e) => {this.setState({token: e.target.value})}}
                                 />
-                                {name_error}
+                                {token_error}
                             </div>
 
                             <div className="form-group">
-                                <label>Password</label>
+                                <label>New Password</label>
                                 <input type="password" className="form-control" placeholder="Password" name='password'
                                 onChange={(e) => {this.setState({password: e.target.value})}}
                                 />
@@ -138,8 +131,7 @@ class Register extends Component {
                                 {confirm_error}
                             </div>
 
-                            <button type="submit" className="btn btn-primary btn-block">Login</button>
-                            <Link to='/login'>Have an account?</Link>
+                            <button type="submit" className="btn btn-primary btn-block">Reset</button>
                         </form>
                     </div>
                 </div>
@@ -148,4 +140,4 @@ class Register extends Component {
     }
 }
 
-export default Register
+export default Reset
